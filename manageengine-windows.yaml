@@ -27,4 +27,7 @@ mainSteps:
     inputs:
       runCommand:
         - Write-Host "Installing ManageEngine UEM agent..."
-        - msiexec /i C:\temp\ME\UEMSAgent.msi REBOOT="REALLYSUPPRESS" MSIRESTARTMANAGERCONTROL="Disable" TRANSFORMS=C:\temp\ME\UEMSAgent.mst ENABLESILENT=yes /qn
+        - $argList = '/i C:\temp\ME\UEMSAgent.msi REBOOT="REALLYSUPPRESS" MSIRESTARTMANAGERCONTROL="Disable" TRANSFORMS=C:\temp\ME\UEMSAgent.mst ENABLESILENT=yes /qn'
+        - $p = Start-Process -FilePath msiexec.exe -ArgumentList $argList -Wait -PassThru
+        - Write-Host "msiexec exit code = $($p.ExitCode)"
+        - if ($p.ExitCode -notin 0, 3010) { throw "ManageEngine install failed with exit code $($p.ExitCode)" }
