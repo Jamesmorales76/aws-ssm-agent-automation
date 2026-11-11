@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2.2",
+  "description": "Composite document that installs and configures the Amazon CloudWatch Agent.",
+  "mainSteps": [
+    {
+      "action": "aws:runDocument",
+      "name": "InstallCloudWatchAgent",
+      "inputs": {
+        "documentType": "SSMDocument",
+        "documentPath": "AWS-ConfigureAWSPackage",
+        "documentParameters": "{\"action\":\"Install\",\"name\":\"AmazonCloudWatchAgent\"}"
+      }
+    },
+    {
+      "action": "aws:runDocument",
+      "name": "ConfigureCloudWatchAgent",
+      "inputs": {
+        "documentType": "SSMDocument",
+        "documentPath": "AmazonCloudWatch-ManageAgent",
+        "documentParameters": {
+          "action": "configure",
+          "mode": "ec2",
+          "optionalConfigurationSource": "default",
+          "optionalRestart": "yes"
+        }
+      }
+    }
+  ]
+}
