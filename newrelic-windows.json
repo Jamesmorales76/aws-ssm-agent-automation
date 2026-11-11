@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2.2",
+  "description": "Install New Relic on Windows using the New Relic CLI.",
+  "parameters": {
+    "apiKey": {
+      "type": "String",
+      "description": "New Relic API key. Store real keys in Parameter Store, not here.",
+      "default": "your-api-key-here"
+    },
+    "accountId": {
+      "type": "String",
+      "description": "New Relic account ID.",
+      "default": "your-account-id-here"
+    }
+  },
+  "mainSteps": [
+    {
+      "action": "aws:runPowerShellScript",
+      "name": "InstallNewRelic",
+      "inputs": {
+        "runCommand": [
+          "$tempDir = $env:TEMP",
+          "Set-Location $tempDir",
+          "Invoke-WebRequest -Uri 'https://download.newrelic.com/install/newrelic-cli/scripts/install.ps1' -OutFile 'install.ps1'",
+          "& \"$tempDir\\install.ps1\"",
+          "$env:NEW_RELIC_API_KEY = '{{ apiKey }}'",
+          "$env:NEW_RELIC_ACCOUNT_ID = '{{ accountId }}'",
+          "& 'C:\\Program Files\\New Relic\\New Relic CLI\\newrelic.exe' install -y"
+        ]
+      }
+    }
+  ]
+}
