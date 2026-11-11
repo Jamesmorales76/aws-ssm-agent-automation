@@ -1,0 +1,30 @@
+---
+schemaVersion: "2.2"
+description: "Download the ManageEngine UEM agent from S3 and install it silently on Windows."
+parameters:
+  bucketName:
+    type: String
+    description: "S3 bucket that holds the installer."
+    default: "your-bucket-name"
+  folderName:
+    type: String
+    description: "S3 prefix for the installer files."
+    default: "installers/windows/manageengine/"
+mainSteps:
+  - name: downloadFromS3
+    action: "aws:runPowerShellScript"
+    inputs:
+      runCommand:
+        - $localPath = 'C:\temp\ME\'
+        - Write-Host "Downloading {{ folderName }} to $localPath..."
+        - Read-S3Object -BucketName '{{ bucketName }}' -KeyPrefix '{{ folderName }}' -Region us-east-1 -Folder $localPath
+        - $installerPath = Join-Path -Path $localPath -ChildPath "UEMSAgent.msi"
+        - if (!(Test-Path -Path $installerPath)) { throw "Installer not found in $localPath" }
+        - Write-Host "Installer downloaded and verified."
+
+  - name: installMSI
+    action: "aws:runPowerShellScript"
+    inputs:
+      runCommand:
+        - Write-Host "Installing ManageEngine UEM agent..."
+        - msiexec /i C:\temp\ME\UEMSAgent.msi REBOOT="REALLYSUPPRESS" MSIRESTARTMANAGERCONTROL="Disable" TRANSFORMS=C:\temp\ME\UEMSAgent.mst ENABLESILENT=yes /qn
